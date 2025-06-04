@@ -136,6 +136,7 @@
             position: relative;
             overflow: hidden;
             text-decoration: none;
+            margin: 5px;
         }
         
         .download-btn::before {
@@ -168,6 +169,10 @@
             opacity: 0.6;
             cursor: not-allowed;
             transform: none;
+        }
+        
+        .generate-btn {
+            background: linear-gradient(135deg, #48c78e 0%, #5dd39e 100%);
         }
         
         .clear-btn {
@@ -210,6 +215,48 @@
             background: rgba(241, 70, 104, 0.2);
             border: 1px solid rgba(241, 70, 104, 0.3);
             color: #f14668;
+        }
+        
+        .url-section {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(70,105,161,0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .url-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #e6e6e6;
+        }
+        
+        .url-input {
+            width: 100%;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(70,105,161,0.2);
+            border-radius: 8px;
+            padding: 12px;
+            color: #ffffff;
+            font-family: monospace;
+            font-size: 14px;
+            word-break: break-all;
+        }
+        
+        .copy-btn {
+            background: rgba(70,105,161,0.2);
+            border: 1px solid rgba(70,105,161,0.3);
+            color: #4669A1;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        
+        .copy-btn:hover {
+            background: rgba(70,105,161,0.3);
         }
         
         .preview-section {
@@ -318,10 +365,23 @@
                 <button class="download-btn" id="downloadBtn">
                     📥 Download CSV
                 </button>
+                <button class="download-btn generate-btn" id="generateBtn">
+                    🔄 Generate Static CSV
+                </button>
                 <br>
                 <button class="clear-btn" id="clearBtn">
                     🗑️ Clear All Data
                 </button>
+            </div>
+            
+            <div class="url-section">
+                <div class="url-title">📡 n8n Access URL</div>
+                <input type="text" class="url-input" id="csvUrl" readonly 
+                       placeholder="Generate CSV first to get the URL">
+                <button class="copy-btn" id="copyBtn">📋 Copy URL</button>
+                <div style="margin-top: 10px; font-size: 12px; color: #999;">
+                    Use this URL in n8n HTTP Request node to fetch the CSV data
+                </div>
             </div>
             
             <div class="preview-section">
@@ -332,6 +392,10 @@
     </div>
 
     <script>
+        // Get the current domain for CSV URL
+        const currentDomain = window.location.origin;
+        const csvFileName = 'membership_data.csv';
+        
         // Function to load and display stats
         function loadStats() {
             const data = JSON.parse(localStorage.getItem('membershipSubmissions') || '[]');
@@ -435,6 +499,71 @@
             }
         }
         
+        // Function to generate static CSV file
+        async function generateStaticCSV() {
+            const data = JSON.parse(localStorage.getItem('membershipSubmissions') || '[]');
+            
+            if (data.length === 0) {
+                showMessage('No data to generate CSV', 'error');
+                return;
+            }
+            
+            const csvContent = jsonToCSV(data);
+            
+            // Create instructions for manual process
+            const instructions = `
+INSTRUCTIONS TO CREATE STATIC CSV:
+
+1. Copy the CSV content below
+2. Create a new file named "${csvFileName}" in your GitHub repository root
+3. Paste the content and commit the changes
+4. The CSV will be accessible at: ${currentDomain}/${csvFileName}
+
+CSV CONTENT:
+${csvContent}
+            `;
+            
+            // Copy to clipboard
+            try {
+                await navigator.clipboard.writeText(instructions);
+                showMessage('Instructions and CSV content copied to clipboard!', 'success');
+                
+                // Update the URL field
+                document.getElementById('csvUrl').value = `${currentDomain}/${csvFileName}`;
+                
+            } catch (err) {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = instructions;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                showMessage('Instructions copied! Check your clipboard.', 'success');
+                document.getElementById('csvUrl').value = `${currentDomain}/${csvFileName}`;
+            }
+        }
+        
+        // Function to copy CSV URL
+        async function copyCsvUrl() {
+            const url = document.getElementById('csvUrl').value;
+            if (!url || url.includes('Generate CSV first')) {
+                showMessage('Generate CSV first to get the URL', 'error');
+                return;
+            }
+            
+            try {
+                await navigator.clipboard.writeText(url);
+                showMessage('URL copied to clipboard!', 'success');
+            } catch (err) {
+                // Fallback
+                document.getElementById('csvUrl').select();
+                document.execCommand('copy');
+                showMessage('URL copied!', 'success');
+            }
+        }
+        
         // Function to clear all data
         function clearAllData() {
             if (confirm('Are you sure you want to clear all submission data? This action cannot be undone.')) {
@@ -459,12 +588,16 @@
         
         // Event listeners
         document.getElementById('downloadBtn').addEventListener('click', downloadCSV);
+        document.getElementById('generateBtn').addEventListener('click', generateStaticCSV);
+        document.getElementById('copyBtn').addEventListener('click', copyCsvUrl);
         document.getElementById('clearBtn').addEventListener('click', clearAllData);
         
         // Load data on page load
         window.addEventListener('load', () => {
             loadStats();
             displayPreview();
+            // Set the potential CSV URL
+            document.getElementById('csvUrl').placeholder = `${currentDomain}/${csvFileName}`;
         });
         
         // Refresh data every 30 seconds
