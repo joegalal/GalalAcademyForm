@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Channel Membership Form</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #ffffff;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border-radius: 20px;
+            box-shadow: 
+                0 20px 40px rgba(0,0,0,0.6),
+                0 0 0 1px rgba(70,105,161,0.2),
+                inset 0 1px 0 rgba(255,255,255,0.1);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4669A1 0%, #5a7bc8 50%, #4669A1 100%);
+            box-shadow: 0 0 20px rgba(70,105,161,0.5);
+        }
+        
+        .form-header {
+            padding: 40px 40px 30px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(70,105,161,0.1) 0%, rgba(70,105,161,0.05) 100%);
+            border-bottom: 1px solid rgba(70,105,161,0.2);
+        }
+        
+        .profile-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid #4669A1;
+            box-shadow: 
+                0 0 30px rgba(70,105,161,0.4),
+                0 8px 20px rgba(0,0,0,0.3);
+            margin: 0 auto 25px auto;
+            object-fit: cover;
+            display: block;
+            background: linear-gradient(135deg, #4669A1 0%, #5a7bc8 100%);
+        }
+        
+        .form-title {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #4669A1 0%, #5a7bc8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(70,105,161,0.3);
+        }
+        
+        .form-subtitle {
+            color: #cccccc;
+            font-size: 16px;
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+        
+        .form-description {
+            color: #999999;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .form-body {
+            padding: 40px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-label {
+            display: block;
+            color: #e6e6e6;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .required {
+            color: #4669A1;
+        }
+        
+        .form-helper {
+            color: #999999;
+            font-size: 12px;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 16px 18px;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(70,105,161,0.3);
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 16px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #4669A1;
+            box-shadow: 
+                0 0 0 3px rgba(70,105,161,0.2),
+                0 0 20px rgba(70,105,161,0.3);
+            background: rgba(255,255,255,0.08);
+        }
+        
+        .form-input::placeholder {
+            color: #666666;
+        }
+        
+        .email-input {
+            padding-left: 50px;
+        }
+        
+        .email-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #4669A1;
+            font-size: 16px;
+        }
+        
+        .input-wrapper {
+            position: relative;
+        }
+        
+        .tier-options {
+            display: grid;
+            gap: 12px;
+        }
+        
+        .tier-option {
+            position: relative;
+        }
+        
+        .tier-radio {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .tier-label {
+            display: block;
+            padding: 16px 20px;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(70,105,161,0.2);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .tier-label::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(70,105,161,0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .tier-radio:checked + .tier-label {
+            border-color: #4669A1;
+            background: linear-gradient(135deg, rgba(70,105,161,0.15) 0%, rgba(70,105,161,0.1) 100%);
+            box-shadow: 
+                0 0 20px rgba(70,105,161,0.2),
+                inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+        
+        .tier-radio:checked + .tier-label::before {
+            left: 100%;
+        }
+        
+        .tier-label:hover {
+            border-color: rgba(70,105,161,0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #4669A1 0%, #5a7bc8 100%);
+            border: none;
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 8px 25px rgba(70,105,161,0.3),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 12px 35px rgba(70,105,161,0.4),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+        
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+        
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+        
+        .thank-you-page {
+            display: none;
+            text-align: center;
+            padding: 60px 40px;
+        }
+        
+        .success-icon {
+            font-size: 80px;
+            margin-bottom: 30px;
+            filter: drop-shadow(0 0 20px rgba(70,105,161,0.5));
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        .thank-you-title {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #4669A1 0%, #5a7bc8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+        }
+        
+        .thank-you-message {
+            color: #cccccc;
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 40px;
+        }
+        
+        .social-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #4669A1 0%, #5a7bc8 100%);
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(70,105,161,0.3);
+        }
+        
+        .social-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(70,105,161,0.4);
+        }
+        
+        .back-btn {
+            margin-top: 20px;
+            padding: 12px 24px;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(70,105,161,0.3);
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(70,105,161,0.2);
+            border-color: #4669A1;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                border-radius: 16px;
+            }
+            
+            .form-header,
+            .form-body {
+                padding: 30px 25px;
+            }
+            
+            .form-title {
+                font-size: 24px;
+            }
+            
+            .profile-image {
+                width: 80px;
+                height: 80px;
+                font-size: 32px;
+            }
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #ffffff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Submission Form Page -->
+        <div id="submission-page">
+            <div class="form-header">
+                <img src="https://i.ibb.co/N2vhYXRD/1731938090250.jpg" alt="Channel Profile" class="profile-image">
+                <h1 class="form-title">🌟 Thank you for becoming a Channel Member!</h1>
+                <p class="form-subtitle">Premium Membership Access</p>
+                <p class="form-description">Fill out this form in order to grant you access as soon as possible!</p>
+            </div>
+            
+            <div class="form-body">
+                <form id="membershipForm">
+                    <div class="form-group">
+                        <label class="form-label" for="channelName">
+                            Name of your YouTube Channel! <span class="required">*</span>
+                        </label>
+                        <p class="form-helper">This is the name of the YouTube user associated with your membership</p>
+                        <input type="text" id="channelName" name="channelName" class="form-input" placeholder="Enter your YouTube channel name..." required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="email">
+                            Your Email <span class="required">*</span>
+                        </label>
+                        <p class="form-helper">In order to access documents hosted on Google Drive, You must provide us with a Gmail Account</p>
+                        <div class="input-wrapper">
+                            <span class="email-icon">📧</span>
+                            <input type="email" id="email" name="email" class="form-input email-input" placeholder="Sample@gmail.com" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            Membership Tier <span class="required">*</span>
+                        </label>
+                        <div class="tier-options">
+                            <div class="tier-option">
+                                <input type="radio" id="basic" name="tier" value="Basic" class="tier-radio">
+                                <label for="basic" class="tier-label">Basic</label>
+                            </div>
+                            <div class="tier-option">
+                                <input type="radio" id="gold" name="tier" value="Gold" class="tier-radio">
+                                <label for="gold" class="tier-label">Gold</label>
+                            </div>
+                            <div class="tier-option">
+                                <input type="radio" id="elite" name="tier" value="Elite" class="tier-radio">
+                                <label for="elite" class="tier-label">Elite</label>
+                            </div>
+                            <div class="tier-option">
+                                <input type="radio" id="platinum" name="tier" value="Platinum" class="tier-radio" checked>
+                                <label for="platinum" class="tier-label">Platinum</label>
+                            </div>
+                            <div class="tier-option">
+                                <input type="radio" id="personal" name="tier" value="Personal Coaching" class="tier-radio">
+                                <label for="personal" class="tier-label">Personal Coaching</label>
+                            </div>
+                            <div class="tier-option">
+                                <input type="radio" id="personalPlus" name="tier" value="Personal Coaching +" class="tier-radio">
+                                <label for="personalPlus" class="tier-label">Personal Coaching +</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        Get Access!
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Thank You Page -->
+        <div id="thank-you-page" class="thank-you-page">
+            <div class="success-icon">🎉</div>
+            <h1 class="thank-you-title">Thanks!</h1>
+            <p class="thank-you-message">
+                Your membership request has been submitted successfully!<br>
+                We'll process your access within 24 hours and send you an email confirmation.
+            </p>
+            
+            <div class="social-links">
+                <a href="https://www.youtube.com/@Abdullahgalal/" target="_blank" class="social-link">📺</a>
+                <a href="https://www.linkedin.com/in/galal/" target="_blank" class="social-link">💼</a>
+                <a href="https://www.galalconsulting.com/" target="_blank" class="social-link">🌐</a>
+            </div>
+            
+            <button class="back-btn" onclick="goBackToForm()">Submit Another Form</button>
+        </div>
+    </div>
+
+    <script>
+        // Simple form submission handler
+        document.getElementById('submitBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const channelName = document.getElementById('channelName').value;
+            const email = document.getElementById('email').value;
+            const selectedTier = document.querySelector('input[name="tier"]:checked');
+            
+            // Basic validation
+            if (!channelName.trim()) {
+                alert('Please enter your YouTube channel name');
+                return;
+            }
+            
+            if (!email.trim() || !email.includes('@')) {
+                alert('Please enter a valid email address');
+                return;
+            }
+            
+            if (!selectedTier) {
+                alert('Please select a membership tier');
+                return;
+            }
+            
+            // Show loading
+            this.innerHTML = '<span class="loading"></span>Submitting...';
+            this.disabled = true;
+            
+            // Log the data (replace with your backend call)
+            console.log('Submitted:', {
+                channelName: channelName,
+                email: email,
+                tier: selectedTier.value,
+                timestamp: new Date()
+            });
+            
+            // Show thank you page after 1 second
+            setTimeout(() => {
+                document.getElementById('submission-page').style.display = 'none';
+                document.getElementById('thank-you-page').style.display = 'block';
+                
+                // Reset button
+                this.innerHTML = 'Get Access!';
+                this.disabled = false;
+            }, 1000);
+        });
+        
+        function goBackToForm() {
+            document.getElementById('thank-you-page').style.display = 'none';
+            document.getElementById('submission-page').style.display = 'block';
+            // Clear form
+            document.getElementById('channelName').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('platinum').checked = true;
+        }
+    </script>
+</body>
+</html>
