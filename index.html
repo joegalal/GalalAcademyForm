@@ -265,6 +265,12 @@
             transform: translateY(0);
         }
         
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
         .thank-you-page {
             display: none;
             text-align: center;
@@ -418,6 +424,33 @@
             margin-top: 5px;
             display: none;
         }
+
+        .message {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: 500;
+            text-align: center;
+            display: none;
+        }
+
+        .message.success {
+            background: rgba(72, 199, 142, 0.2);
+            border: 1px solid rgba(72, 199, 142, 0.3);
+            color: #48c78e;
+        }
+
+        .message.error {
+            background: rgba(241, 70, 104, 0.2);
+            border: 1px solid rgba(241, 70, 104, 0.3);
+            color: #f14668;
+        }
+
+        .message.loading {
+            background: rgba(70, 105, 161, 0.2);
+            border: 1px solid rgba(70, 105, 161, 0.3);
+            color: #4669A1;
+        }
     </style>
 </head>
 <body>
@@ -432,6 +465,8 @@
             </div>
             
             <div class="form-body">
+                <div id="message" class="message"></div>
+                
                 <form id="membershipForm">
                     <div class="form-group">
                         <label class="form-label" for="channelName">
@@ -527,12 +562,17 @@
         // Google Sheets configuration
         const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzA7SLjSQOr6THnB05lV42ibDRYIAScgY8TBJTHt5t2GnF0S9UAUVJDnT0OwmOvxjil4Q/exec';
         
-        // Form submission handler with Google Sheets integration
-        document.getElementById('submitBtn').addEventListener('click', function(e) {
+        const form = document.getElementById('membershipForm');
+        const submitButton = document.getElementById('submitBtn');
+        const messageDiv = document.getElementById('message');
+        
+        // Form submission handler with Google Sheets integration (using first form's method)
+        form.addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            // Clear previous errors
+            // Clear previous errors and messages
             document.querySelectorAll('.error-message').forEach(error => error.style.display = 'none');
+            messageDiv.style.display = 'none';
             
             // Get form values
             const channelName = document.getElementById('channelName').value.trim();
@@ -561,64 +601,69 @@
                 return;
             }
             
-            // Show loading
-            this.innerHTML = '<span class="loading"></span>Submitting...';
-            this.disabled = true;
+            // Show loading state
+            messageDiv.textContent = 'Submitting...';
+            messageDiv.className = 'message loading';
+            messageDiv.style.display = 'block';
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="loading"></span>Submitting...';
             
-            // Prepare data for Google Sheets
-            const formData = {
-                channelName: channelName,
-                email: email,
-                tier: selectedTier.value,
-                timestamp: new Date().toLocaleString()
-            };
-            
-            // Submit to Google Sheets
-            submitToGoogleSheets(formData)
-                .then(() => {
-                    // Show thank you page on success
-                    document.getElementById('submission-page').style.display = 'none';
-                    document.getElementById('thank-you-page').style.display = 'block';
-                    
-                    // Reset button
-                    this.innerHTML = 'Get Access!';
-                    this.disabled = false;
-                })
-                .catch((error) => {
-                    console.error('Submission error:', error);
-                    alert('There was an error submitting your form. Please try again.');
-                    
-                    // Reset button
-                    this.innerHTML = 'Get Access!';
-                    this.disabled = false;
-                });
-        });
-        
-        // Function to submit data to Google Sheets
-        async function submitToGoogleSheets(data) {
             try {
+                // Prepare form data object (matching first form's structure)
+                const formDataObj = {
+                    'YouTube Channel': channelName,
+                    'Email': email,
+                    'Membership Tier': selectedTier.value,
+                    'Timestamp': new Date().toISOString()
+                };
+                
+                // Submit to Google Sheets using the same method as the first form
                 const response = await fetch(GOOGLE_SHEETS_URL, {
+                    redirect: 'follow',
                     method: 'POST',
-                    mode: 'no-cors',
+                    body: JSON.stringify(formDataObj),
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'text/plain;charset=utf-8',
                     },
-                    body: JSON.stringify(data)
                 });
                 
-                // Note: With 'no-cors' mode, we can't read the response
-                // but the request will be sent to Google Sheets
-                console.log('Data submitted:', data);
+                const data = await response.json();
                 
-                // Simulate a delay for better UX
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                if (data.status === 'success') {
+                    // Show success message
+                    messageDiv.textContent = data.message || 'Data submitted successfully!';
+                    messageDiv.className = 'message success';
+                    
+                    // Show thank you page after a short delay
+                    setTimeout(() => {
+                        document.getElementById('submission-page').style.display = 'none';
+                        document.getElementById('thank-you-page').style.display = 'block';
+                    }, 1500);
+                    
+                    // Reset form
+                    form.reset();
+                    document.getElementById('platinum').checked = true;
+                } else {
+                    throw new Error(data.message || 'Submission failed');
+                }
                 
-                return Promise.resolve();
             } catch (error) {
-                console.error('Error submitting to Google Sheets:', error);
-                throw error;
+                console.error('Error:', error);
+                messageDiv.textContent = 'Error: ' + error.message;
+                messageDiv.className = 'message error';
+            } finally {
+                // Reset button state
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'Get Access!';
+                
+                // Hide message after 4 seconds if it's not the success message
+                if (!messageDiv.classList.contains('success')) {
+                    setTimeout(() => {
+                        messageDiv.style.display = 'none';
+                    }, 4000);
+                }
             }
-        }
+        });
         
         function goBackToForm() {
             document.getElementById('thank-you-page').style.display = 'none';
@@ -629,8 +674,9 @@
             document.getElementById('email').value = '';
             document.getElementById('platinum').checked = true;
             
-            // Clear error messages
+            // Clear error messages and status message
             document.querySelectorAll('.error-message').forEach(error => error.style.display = 'none');
+            messageDiv.style.display = 'none';
         }
     </script>
 </body>
