@@ -1000,6 +1000,9 @@
                 return;
             }
 
+            // Log the URL to the console right before the fetch call
+            console.log('Attempting to send data to Google Apps Script at URL:', config.sheetsApiUrl);
+
             button.disabled = true;
             button.innerHTML = '<span class="loading"></span>Granting...'; // Show loading spinner
 
