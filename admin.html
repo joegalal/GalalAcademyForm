@@ -375,6 +375,11 @@
             color: #48c78e;
         }
         
+        .instructions .important {
+            color: #ffc107;
+            font-weight: bold;
+        }
+
         @media (max-width: 768px) {
             .controls {
                 grid-template-columns: 1fr;
@@ -410,10 +415,11 @@
                 <li>Open your Google Form responses sheet.</li>
                 <li>Go to <strong>Extensions → Apps Script</strong>.</li>
                 <li>Delete any existing code and paste the provided Google Apps Script.</li>
-                <li>Click <strong>Save</strong>, then <strong>Deploy → New Deployment</strong>.</li>
+                <li>Click <strong>Save project</strong>.</li>
+                <li>Click <strong>Deploy → New Deployment</strong>. <span class="important">ALWAYS use "New Deployment" after making script changes.</span></li>
                 <li>For type, select "<strong>Web app</strong>".</li>
                 <li>Set "Execute as" to "<strong>Me</strong>".</li>
-                <li>Set "Who has access" to "<strong>Anyone</strong>" (this is safe, as the script only responds to your specific actions).</li>
+                <li>Set "Who has access" to "<strong>Anyone</strong>". This is required for the tool to work.</li>
                 <li>Click <strong>Deploy</strong> and then <strong>Authorize access</strong>.</li>
                 <li>Copy the generated <strong>Web app URL</strong> and paste it below.</li>
             </ol>
@@ -543,17 +549,17 @@
             
             showMessage('Testing connection...', 'info');
             try {
-                // Use a 'no-cors' mode for a simple test to avoid CORS issues on a basic check
                 const response = await fetch(config.sheetsApiUrl + '?action=test');
                 
                 if (response.ok) {
                     const data = await response.json();
                     showMessage('✅ Connection successful! ' + (data.message || ''), 'success');
                 } else {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}. Response: ${errorText}`);
                 }
             } catch (error) {
-                showMessage('❌ Connection failed. Check the URL and deployment settings (ensure access is "Anyone"). ' + error.message, 'error');
+                showMessage('❌ Connection failed. Check the URL and deployment settings (ensure access is "Anyone" and you created a new deployment). ' + error.message, 'error', 10000);
                 console.error('Connection test error:', error);
             }
         }
@@ -609,7 +615,8 @@
                 const response = await fetch(config.sheetsApiUrl + '?action=getData');
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                     const errorText = await response.text();
+                     throw new Error(`HTTP ${response.status}: ${response.statusText}. Response from script: ${errorText}`);
                 }
                 
                 const data = await response.json();
@@ -640,7 +647,7 @@
                 
             } catch (error) {
                 console.error('Error loading Google Sheets data:', error);
-                showMessage('❌ Error loading form submissions: ' + error.message, 'error');
+                showMessage('❌ Error loading form submissions: ' + error.message, 'error', 10000);
             } finally {
                 loadBtn.disabled = false;
                 toggleSpinner('loadBtnSpinner', 'loadBtnText', false);
@@ -857,24 +864,32 @@
                 
                 const response = await fetch(config.sheetsApiUrl, {
                     method: 'POST',
-                    mode: 'no-cors', // Use no-cors as Apps Script POST redirect can cause CORS errors
+                    mode: 'cors', // Changed from no-cors to cors
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         action: 'addMember',
                         data: accessData
                     })
                 });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Failed to grant access: ${errorText}`);
+                }
                 
-                // Since 'no-cors' gives an opaque response, we can't read the response body.
-                // We'll optimistically assume success if no network error occurred.
-                showMessage(`✅ Access granted for ${member.channel}! Data sent to 'Approved Members' sheet.`, 'success');
-                
-                button.textContent = 'Access Granted ✓';
-                button.className = 'btn btn-secondary';
-                button.disabled = true;
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    showMessage(`✅ Access granted for ${member.channel}! Data sent to 'Approved Members' sheet.`, 'success');
+                    button.textContent = 'Access Granted ✓';
+                    button.className = 'btn btn-secondary';
+                    button.disabled = true;
+                } else {
+                    throw new Error(result.message || 'Unknown error from script');
+                }
                 
             } catch (error) {
-                showMessage('❌ Error granting access: ' + error.message, 'error');
+                showMessage('❌ Error granting access: ' + error.message, 'error', 10000);
                 console.error('Grant access error:', error);
                 button.disabled = false;
                 button.innerHTML = 'Give Access';
