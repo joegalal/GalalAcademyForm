@@ -514,7 +514,7 @@
                    id="sheetsApiUrl"
                    class="config-input"
                    placeholder="Paste your Google Apps Script Web App URL here..."
-                   value="https://script.google.com/macros/s/AKfycbxJ7WxEAvzz4zhcV1BMSujQUuumou1YMbQn7_LyqeIfTnDS0J4uyWhN890PuetwDj9M/exec">
+                   value="https://script.google.com/macros/s/AKfycbxJ7WxEAvzz4zhcV1BMSujQUuumou1YMbQn7_LyqeIfTnDS0JuyWhN890PuetwDj9M/exec">
             <div class="config-help">This should look like: https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec</div>
 
             <button class="btn btn-primary" onclick="saveConfiguration()">Save Configuration</button>
@@ -617,7 +617,8 @@
             config = { ...config, ...savedConfig };
 
             // Initialize the input field with the stored or default URL
-            document.getElementById('sheetsApiUrl').value = config.sheetsApiUrl || 'https://script.google.com/macros/s/AKfycbxJ7WxEAvzz4zhcV1BMSujQUuumou1YMbQn7_LyqeIfTnDS0J4uyWhN890PuetwDj9M/exec';
+            // This is the URL that was expected to be pre-filled after the previous update.
+            document.getElementById('sheetsApiUrl').value = config.sheetsApiUrl || 'https://script.google.com/macros/s/AKfycbxJ7WxEAvzz4zhcV1BMSujQUuumou1YMbQn7_LyqeIfTnDS0JuyWhN890PuetwDj9M/exec';
         }
 
         /**
@@ -647,21 +648,13 @@
             showMessage('Testing connection...', 'info');
             try {
                 // Use 'no-cors' mode for a basic test to avoid CORS issues on a simple GET request.
-                // Note: Actual data fetching and POST requests might require more sophisticated CORS handling
-                // on the Apps Script side, but this provides a quick connectivity check.
                 const response = await fetch(config.sheetsApiUrl + '?action=test');
 
-                // For 'no-cors', response.ok might not be reliable, but response.type will be 'opaque'.
-                // We optimistically assume success if no network error occurred.
-                // If a real JSON response is expected, the Apps Script side needs to handle CORS headers.
-                // For this example, we assume `response.ok` is sufficient if the script returns 200.
                 if (response.ok) {
-                    // Attempt to parse JSON, but catch error if response is opaque.
                     let data = {};
                     try {
                         data = await response.json();
                     } catch (e) {
-                        // If no-cors or opaque response, data parsing might fail.
                         console.warn('Could not parse response JSON for test connection (expected if using no-cors).');
                     }
                     showMessage('✅ Connection successful! ' + (data.message || 'Ready to fetch data.'), 'success');
@@ -746,7 +739,6 @@
                 }
 
                 // Dynamically identify columns to handle variations in form naming.
-                // This makes the script more robust to changes in form header names.
                 const headers = data.headers;
                 const channelNameKey = headers.find(h => h.toLowerCase().includes('channel name')) || headers[1];
                 const emailKey = headers.find(h => h.toLowerCase().includes('email')) || headers[2]; // Using 'email' for robustness
@@ -758,7 +750,7 @@
                     channel: row[channelNameKey],
                     email: row[emailKey],
                     tier: row[tierKey] || 'Member', // Default tier to 'Member' if not specified
-                    originalRow: row // Keep original row data if needed
+                    originalRow: row
                 })).filter(item => item.channel && item.email); // Filter out rows with missing channel or email
 
                 showMessage(`✅ Loaded ${formSubmissions.length} form submissions successfully!`, 'success');
@@ -1048,10 +1040,12 @@
 
         // Initial load function called when the window finishes loading
         window.onload = function() {
-            loadConfiguration(); // Load saved API URL
-            console.log('Dashboard loaded. sheetsApiUrl is:', config.sheetsApiUrl); // NEW CONSOLE LOG
-            renderMembersTable(); // Render table initially (will show placeholder if no data)
-            updateStats(); // Update stats initially (will be zeros)
+            // IMPORTANT: Force clear localStorage to ensure the HTML value is used first
+            localStorage.removeItem('sheetsConfig'); 
+            loadConfiguration(); // Load saved API URL (now will be fresh from HTML value)
+            console.log('Dashboard loaded. sheetsApiUrl is:', config.sheetsApiUrl); 
+            renderMembersTable(); 
+            updateStats(); 
         };
     </script>
 </body>
