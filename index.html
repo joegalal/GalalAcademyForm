@@ -559,23 +559,17 @@
     </div>
 
     <script>
-        // CSV Storage Functions
-        function saveToCSV(data) {
-            // Get existing data from localStorage or create new array
-            let csvData = JSON.parse(localStorage.getItem('membershipSubmissions') || '[]');
-            
-            // Add new submission
-            csvData.push(data);
-            
-            // Save back to localStorage
-            localStorage.setItem('membershipSubmissions', JSON.stringify(csvData));
-        }
-        
+        // =========================================================================
+        // START: FINALIZED SCRIPT
+        // =========================================================================
+
         const form = document.getElementById('membershipForm');
         const submitButton = document.getElementById('submitBtn');
         const messageDiv = document.getElementById('message');
         
-        // Form submission handler with CSV storage
+        // The URL for your Google Apps Script Web App
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwMhIzSXwkREq4cXlJWMBb6EP12txXDIay4oerYv6AbMH5cGMACoOgNzzQkWa871STT5g/exec';
+
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -596,7 +590,8 @@
                 hasErrors = true;
             }
             
-            if (!email || !email.includes('@')) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email || !emailRegex.test(email)) {
                 document.getElementById('emailError').style.display = 'block';
                 hasErrors = true;
             }
@@ -611,53 +606,54 @@
             }
             
             // Show loading state
-            messageDiv.textContent = 'Submitting...';
-            messageDiv.className = 'message loading';
-            messageDiv.style.display = 'block';
+            showMessage('Submitting...', 'loading');
             submitButton.disabled = true;
             submitButton.innerHTML = '<span class="loading"></span>Submitting...';
             
             try {
-                // Prepare form data object
-                const formDataObj = {
-                    'Timestamp': new Date().toISOString(),
-                    'YouTube Channel': channelName,
-                    'Email': email,
-                    'Membership Tier': selectedTier.value
-                };
+                // Prepare form data object for sending
+                const formData = new FormData();
+                formData.append('Timestamp', new Date().toISOString());
+                formData.append('YouTube Channel', channelName);
+                formData.append('Email', email);
+                formData.append('Membership Tier', selectedTier.value);
                 
-                // Save to CSV storage
-                saveToCSV(formDataObj);
+                // Send data to Google Apps Script
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                   throw new Error('Network response was not ok.');
+                }
                 
-                // Show success message
-                messageDiv.textContent = 'Submission saved successfully!';
-                messageDiv.className = 'message success';
+                const result = await response.json();
                 
-                // Show thank you page after a short delay
-                setTimeout(() => {
-                    document.getElementById('submission-page').style.display = 'none';
-                    document.getElementById('thank-you-page').style.display = 'block';
-                }, 1500);
-                
-                // Reset form
-                form.reset();
-                document.getElementById('platinum').checked = true;
+                if (result.status === 'success') {
+                    // Show success message
+                    showMessage(result.message, 'success');
+                    
+                    // Show thank you page after a short delay
+                    setTimeout(() => {
+                        document.getElementById('submission-page').style.display = 'none';
+                        document.getElementById('thank-you-page').style.display = 'block';
+                    }, 1500);
+                    
+                    // Reset form
+                    form.reset();
+                    document.getElementById('platinum').checked = true;
+                } else {
+                    throw new Error(result.message || 'An unknown error occurred.');
+                }
                 
             } catch (error) {
                 console.error('Error:', error);
-                messageDiv.textContent = 'Error: ' + error.message;
-                messageDiv.className = 'message error';
+                showMessage('Error: ' + error.message, 'error');
             } finally {
                 // Reset button state
                 submitButton.disabled = false;
                 submitButton.innerHTML = 'Get Access!';
-                
-                // Hide message after 4 seconds if it's not the success message
-                if (!messageDiv.classList.contains('success')) {
-                    setTimeout(() => {
-                        messageDiv.style.display = 'none';
-                    }, 4000);
-                }
             }
         });
         
@@ -674,6 +670,25 @@
             document.querySelectorAll('.error-message').forEach(error => error.style.display = 'none');
             messageDiv.style.display = 'none';
         }
+
+        // Helper function to show messages
+        function showMessage(text, type) {
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type}`;
+            messageDiv.style.display = 'block';
+            
+             // Hide message after 4 seconds if it's not the loading message
+             if (type !== 'loading') {
+                setTimeout(() => {
+                    if (messageDiv.textContent === text) { // Only hide if the message hasn't changed
+                       messageDiv.style.display = 'none';
+                    }
+                }, 4000);
+            }
+        }
+        // =========================================================================
+        // END: FINALIZED SCRIPT
+        // =========================================================================
     </script>
 </body>
 </html>
