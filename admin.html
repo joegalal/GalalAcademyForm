@@ -514,7 +514,7 @@
                    id="sheetsApiUrl"
                    class="config-input"
                    placeholder="Paste your Google Apps Script Web App URL here..."
-                    value="https://script.google.com/macros/s/AKfycbxJ7WxEAvzz4zhcV1BMSujQUuumou1YMbQn7_LyqeIfTnDS0J4uyWhN890PuetwDj9M/exec">
+                   value="https://script.google.com/macros/s/AKfycbxJ7WxEAvzz4zhcV1BMSujQUuumou1YMbQn7_LyqeIfTnDS0J4uyWhN890PuetwDj9M/exec">
             <div class="config-help">This should look like: https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec</div>
 
             <button class="btn btn-primary" onclick="saveConfiguration()">Save Configuration</button>
@@ -616,7 +616,8 @@
             const savedConfig = JSON.parse(localStorage.getItem('sheetsConfig') || '{}');
             config = { ...config, ...savedConfig };
 
-            document.getElementById('sheetsApiUrl').value = config.sheetsApiUrl || '';
+            // Initialize the input field with the stored or default URL
+            document.getElementById('sheetsApiUrl').value = config.sheetsApiUrl || 'https://script.google.com/macros/s/AKfycbxJ7WxEAvzz4zhcV1BMSujQUuumou1YMbQn7_LyqeIfTnDS0J4uyWhN890PuetwDj9M/exec';
         }
 
         /**
@@ -748,7 +749,7 @@
                 // This makes the script more robust to changes in form header names.
                 const headers = data.headers;
                 const channelNameKey = headers.find(h => h.toLowerCase().includes('channel name')) || headers[1];
-                const emailKey = headers.find(h => h.toLowerCase().includes('email address')) || headers[2]; // More robust email key
+                const emailKey = headers.find(h => h.toLowerCase().includes('email')) || headers[2]; // Using 'email' for robustness
                 const tierKey = headers.find(h => h.toLowerCase().includes('tier')) || headers[3];
                 const timestampKey = headers.find(h => h.toLowerCase().includes('timestamp')) || headers[0];
 
@@ -1048,6 +1049,7 @@
         // Initial load function called when the window finishes loading
         window.onload = function() {
             loadConfiguration(); // Load saved API URL
+            console.log('Dashboard loaded. sheetsApiUrl is:', config.sheetsApiUrl); // NEW CONSOLE LOG
             renderMembersTable(); // Render table initially (will show placeholder if no data)
             updateStats(); // Update stats initially (will be zeros)
         };
