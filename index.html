@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Channel Membership Form</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap');
         
         * {
             margin: 0;
@@ -14,7 +14,7 @@
         }
         
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
             min-height: 100vh;
             display: flex;
@@ -22,6 +22,7 @@
             justify-content: center;
             padding: 20px;
             color: #ffffff;
+            font-weight: 400;
         }
         
         .container {
@@ -70,27 +71,32 @@
         }
         
         .form-title {
-            font-size: 28px;
-            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+            font-size: 32px;
+            font-weight: 800;
             background: linear-gradient(135deg, #4669A1 0%, #5a7bc8 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             text-shadow: 0 0 20px rgba(70,105,161,0.3);
+            letter-spacing: -0.5px;
+            line-height: 1.1;
         }
         
         .form-subtitle {
-            color: #cccccc;
-            font-size: 16px;
-            font-weight: 300;
-            margin-bottom: 10px;
+            color: #e0e0e0;
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 12px;
+            letter-spacing: 0.3px;
         }
         
         .form-description {
-            color: #999999;
-            font-size: 14px;
-            line-height: 1.5;
+            color: #b8b8b8;
+            font-size: 15px;
+            line-height: 1.6;
+            font-weight: 400;
         }
         
         .form-body {
@@ -98,26 +104,29 @@
         }
         
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: 28px;
         }
         
         .form-label {
             display: block;
-            color: #e6e6e6;
-            font-size: 14px;
-            font-weight: 500;
+            color: #f0f0f0;
+            font-size: 15px;
+            font-weight: 600;
             margin-bottom: 8px;
+            letter-spacing: 0.2px;
         }
         
         .required {
             color: #4669A1;
+            font-weight: 700;
         }
         
         .form-helper {
-            color: #999999;
-            font-size: 12px;
-            margin-bottom: 8px;
-            line-height: 1.4;
+            color: #a8a8a8;
+            font-size: 13px;
+            margin-bottom: 10px;
+            line-height: 1.5;
+            font-weight: 400;
         }
         
         .form-input {
@@ -128,7 +137,8 @@
             border-radius: 12px;
             color: #ffffff;
             font-size: 16px;
-            font-family: inherit;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 400;
             transition: all 0.3s ease;
             backdrop-filter: blur(10px);
         }
@@ -143,7 +153,8 @@
         }
         
         .form-input::placeholder {
-            color: #666666;
+            color: #777777;
+            font-weight: 400;
         }
         
         .email-input {
@@ -187,8 +198,10 @@
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: 500;
+            font-size: 15px;
             position: relative;
             overflow: hidden;
+            letter-spacing: 0.3px;
         }
         
         .tier-label::before {
@@ -229,7 +242,7 @@
             color: #ffffff;
             font-size: 16px;
             font-weight: 600;
-            font-family: inherit;
+            font-family: 'Poppins', sans-serif;
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 
@@ -237,6 +250,11 @@
                 inset 0 1px 0 rgba(255,255,255,0.2);
             position: relative;
             overflow: hidden;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
         
         .submit-btn::before {
@@ -250,14 +268,14 @@
             transition: left 0.5s ease;
         }
         
-        .submit-btn:hover {
+        .submit-btn:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 
                 0 12px 35px rgba(70,105,161,0.4),
                 inset 0 1px 0 rgba(255,255,255,0.2);
         }
         
-        .submit-btn:hover::before {
+        .submit-btn:hover:not(:disabled)::before {
             left: 100%;
         }
         
@@ -266,7 +284,7 @@
         }
         
         .submit-btn:disabled {
-            opacity: 0.6;
+            opacity: 0.7;
             cursor: not-allowed;
             transform: none;
         }
@@ -297,20 +315,23 @@
         }
         
         .thank-you-title {
-            font-size: 32px;
-            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+            font-size: 36px;
+            font-weight: 800;
             background: linear-gradient(135deg, #4669A1 0%, #5a7bc8 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 15px;
+            margin-bottom: 18px;
+            letter-spacing: -0.5px;
         }
         
         .thank-you-message {
-            color: #cccccc;
+            color: #d0d0d0;
             font-size: 18px;
-            line-height: 1.6;
+            line-height: 1.7;
             margin-bottom: 30px;
+            font-weight: 400;
         }
         
         .social-links {
@@ -363,8 +384,10 @@
             color: #ffffff;
             font-size: 14px;
             font-weight: 500;
+            font-family: 'Poppins', sans-serif;
             cursor: pointer;
             transition: all 0.3s ease;
+            letter-spacing: 0.3px;
         }
         
         .back-btn:hover {
@@ -384,7 +407,7 @@
             }
             
             .form-title {
-                font-size: 24px;
+                font-size: 26px;
             }
             
             .profile-image {
@@ -396,13 +419,12 @@
         
         .loading {
             display: inline-block;
-            width: 20px;
-            height: 20px;
+            width: 16px;
+            height: 16px;
             border: 2px solid rgba(255,255,255,0.3);
             border-radius: 50%;
             border-top-color: #ffffff;
             animation: spin 1s ease-in-out infinite;
-            margin-right: 10px;
         }
         
         @keyframes spin {
@@ -420,18 +442,20 @@
 
         .error-message {
             color: #ff6b6b;
-            font-size: 14px;
-            margin-top: 5px;
+            font-size: 13px;
+            margin-top: 6px;
             display: none;
+            font-weight: 500;
         }
 
         .message {
             margin: 20px 0;
-            padding: 15px;
+            padding: 16px;
             border-radius: 12px;
             font-weight: 500;
             text-align: center;
             display: none;
+            font-size: 15px;
         }
 
         .message.success {
@@ -523,7 +547,7 @@
                     </div>
                     
                     <button type="submit" class="submit-btn" id="submitBtn">
-                        Get Access!
+                        <span id="btnText">Get Access!</span>
                     </button>
                 </form>
             </div>
@@ -561,6 +585,7 @@
     <script>
         const form = document.getElementById('membershipForm');
         const submitButton = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
         const messageDiv = document.getElementById('message');
         
         // The URL for your Google Apps Script Web App has been updated.
@@ -602,9 +627,9 @@
             }
             
             // Show loading state
-            showMessage('Submitting...', 'loading');
+            showMessage('Submitting your request...', 'loading');
             submitButton.disabled = true;
-            submitButton.innerHTML = '<span class="loading"></span>Submitting...';
+            btnText.innerHTML = '<span class="loading"></span>Submitting...';
             
             try {
                 // Prepare form data object for sending
@@ -628,7 +653,7 @@
                 
                 if (result.status === 'success') {
                     // Show success message
-                    showMessage(result.message, 'success');
+                    showMessage('Success! Your request has been submitted.', 'success');
                     
                     // Show thank you page after a short delay
                     setTimeout(() => {
@@ -649,7 +674,7 @@
             } finally {
                 // Reset button state
                 submitButton.disabled = false;
-                submitButton.innerHTML = 'Get Access!';
+                btnText.innerHTML = 'Get Access!';
             }
         });
         
