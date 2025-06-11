@@ -629,7 +629,7 @@
             // Show loading state
             showMessage('Submitting your request...', 'loading');
             submitButton.disabled = true;
-            btnText.innerHTML = '<span class="loading"></span>Submitting...';
+            btnText.textContent = 'Submitting...';
             
             try {
                 // Prepare form data object for sending
@@ -674,7 +674,7 @@
             } finally {
                 // Reset button state
                 submitButton.disabled = false;
-                btnText.innerHTML = 'Get Access!';
+                btnText.textContent = 'Get Access!';
             }
         });
         
